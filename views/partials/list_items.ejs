@@ -1,0 +1,9 @@
+<!-- partials/list_items.ejs -->
+<% for(let i = 0; i < data.length; i++){ %>
+    <tr>         
+      <td><a href = "/content/<%= data[i].id %>"><%= data[i].title %></a></td>
+      <td><%= data[i].created %></td>
+      <td><button class = 'delete btn btn-outline-danger' data-id = '<%= data[i].id %>'>삭제</button></td>
+    </tr>
+  <% } %>
+  

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <%- include('menu.html') %>
+    <p></p>
+
+  <div class="container input-group ml-2 my-3">
+      <input class="form-control sword" type="search" placeholder="검색어를 입력하세요." aria-label="Search">
+      <button class="btn btn-success input-group-append sbtn" type="submit">검색</button>
+  </div><p></p>
+
+
+  <table class = "table table-hover table-striped text-center container mt-4" style = "border: 1px solid;">
+    <thead>
+      <tr>         
+        <th>제목</th>
+        <th>작성일</th>
+        <th>삭제</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% for(let i = 0; i < data.length; i++){ %>
+      <tr>         
+        <td><a href = "/content/<%= data[i].id %>"><%= data[i].title %></a></td>
+        <td><%= data[i].created %></td>
+        <td><button class = 'delete btn btn-outline-danger' data-id = '<%= data[i].id %>'>삭제</button></td>
+      </tr>
+    <% } %>
+    </tbody>            
+  </table>
+
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="/list?page=<%= currentPage - 1 %>" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      <% } %>
+  
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link" href="/list?page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+  
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="/list?page=<%= currentPage + 1 %>" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      <% } %>
+    </ul>
+  </nav>
+
+  <div class = "container my-3">
+    <button class="btn btn-primary enter" style="float: right;">글쓰기</button>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script>
+    $('.delete').click(function(e){
+      if (confirm('정말 삭제하시겠습니까?')) {
+        let sid = e.target.dataset.id;
+        let item = $(this);
+        $.ajax({
+          type : 'post',
+          url : '/delete',
+          data : {id : sid}
+        }).done(function(result){
+          item.parent('td').parent('tr').remove();
+        }).fail(function(xhr, textStatus, errorThrown){
+          console.log('게시물 삭제 실패');
+          console.log(xhr, textStatus, errorThrown);
+        });
+      }
+    })   
+
+    $('.enter').click(function(e){
+      location.href = "\enter";
+    })
+
+    $('.sbtn').click(function(){
+      let inputValue = $('.sword').val();
+      location.href = '\\search?value=' + inputValue;
+    })
+
+    $('.pagination a').click(function(e) {
+    e.preventDefault();
+    let page = $(this).attr('href').split('page=')[1];
+
+    $.ajax({
+        url: '/list?page=' + page,
+        method: 'GET',
+    }).done(function(data) {
+        // 서버에서 받아온 tbody 내용을 삽입
+        $('tbody').html(data);
+
+        // 삭제 버튼 클릭 이벤트 다시 연결
+        $('.delete').click(function(e){
+          if (confirm('정말 삭제하시겠습니까?')) {
+            let sid = e.target.dataset.id;
+            let item = $(this);
+            $.ajax({
+              type : 'post',
+              url : '/delete',
+              data : {id : sid}
+            }).done(function(result){
+              item.parent('td').parent('tr').remove();
+            }).fail(function(xhr, textStatus, errorThrown){
+              console.log('게시물 삭제 실패');
+              console.log(xhr, textStatus, errorThrown);
+            });
+          }
+        });
+
+    }).fail(function(xhr, textStatus, errorThrown) {
+        console.log('페이지 로드 실패');
+    });
+});
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+  </body>
+</html>
